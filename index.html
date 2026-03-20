@@ -3,171 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BORDERLAND VISA</title>
+    <title>BORDERLAND SYSTEM v2.0</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;700&display=swap');
+
         body { 
-            background-color: #fff; 
-            color: #000; 
-            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            background-color: #f8f9fa; 
+            color: #1a1a1a; 
+            font-family: 'Helvetica Neue', 'Arial', 'Noto Sans JP', sans-serif; 
             text-align: center; 
-            padding: 20px; 
             margin: 0; 
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            transition: background-color 0.5s ease;
         }
 
-        /* עיצוב הוויזה כמו בתמונה */
-        #visaScreen { display: none; }
-        .visa-active { display: flex; flex-direction: column; }
-        
-        .game-header { font-size: 1.2rem; margin-bottom: 30px; }
-        .suit-icons { font-size: 3rem; color: #000; letter-spacing: 5px; margin-bottom: 60px; }
-        
-        .japanese-text { font-size: 1.1rem; color: #000; margin-bottom: 20px; }
-        .clock-count { font-size: 3rem; color: #000; font-weight: bold; margin-bottom: 10px; }
-        .days-text { font-size: 1.2rem; color: #000; font-weight: bold; margin-bottom: 20px; }
+        .container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
 
-        /* עיצוב מסכי המשימה */
-        .mission-screen { display: none; }
-        .mission-active { display: flex; flex-direction: column; }
-        .action-btn { background: #000; color: #fff; border: none; padding: 20px; width: 80%; font-size: 1.2rem; cursor: pointer; border-radius: 10px; }
-        .status-msg { margin-top: 10px; color: #000; font-weight: bold; }
+        /* אנימציה לסמלים */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
-        /* כפתורי טסט - להורדה אחר כך */
-        #testControls { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffff00; padding: 10px; display: flex; justify-content: center; gap: 10px; z-index: 1000; }
-        .test-btn { background: #000; color: #fff; border: 1px solid white; padding: 10px; cursor: pointer; }
+        .screen { display: none; width: 100%; max-width: 500px; }
+        .active { display: flex; flex-direction: column; animation: fadeIn 0.8s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* עיצוב הוויזה המקורי */
+        .game-tag { font-size: 1.4rem; font-weight: 300; letter-spacing: 4px; margin-bottom: 20px; color: #333; }
+        .suit-icons { font-size: 3.5rem; margin-bottom: 40px; animation: pulse 3s infinite ease-in-out; }
+        
+        .jp-text { font-size: 1rem; color: #666; margin: 10px 0; font-weight: 300; }
+        .timer-display { font-size: 4.5rem; font-weight: 700; margin: 15px 0; color: #000; letter-spacing: -2px; }
+        .visa-footer { font-size: 1.2rem; font-weight: bold; margin-top: 10px; }
+
+        /* כפתורים ופקדים */
+        .action-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 30px; width: 85%; }
+        .btn-main { background: #000; color: #fff; border: none; padding: 20px; width: 100%; font-size: 1.2rem; font-weight: bold; border-radius: 12px; cursor: pointer; transition: transform 0.2s; margin-top: 20px; }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* פאנל טסטים (למחיקה בסוף) */
+        #adminPanel { position: fixed; top: 0; left: 0; width: 100%; background: #000; color: #fff; padding: 5px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; z-index: 9999; font-size: 10px; }
+        .admin-btn { background: #333; color: #0ff; border: 1px solid #0ff; padding: 5px 8px; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div id="visaScreen" class="visa-active">
-        <div class="game-header">【GAME】</div>
-        <div class="suit-icons">♣️ ♣️ ♣️</div>
+    <div id="adminPanel">
+        <span style="align-self:center">ADMIN:</span>
+        <button class="admin-btn" onclick="showScreen('visaScreen')">וויזה</button>
+        <button class="admin-btn" onclick="showScreen('missionA')">משימה א</button>
+        <button class="admin-btn" onclick="showScreen('missionB')">משימה ב</button>
+        <button class="admin-btn" onclick="showScreen('missionC')">משימה ג</button>
+        <button class="admin-btn" onclick="showScreen('missionD')">משימה ד</button>
+    </div>
+
+    <div class="container">
         
-        <div class="japanese-text">ゲームに生き残った方へ</div>
-        
-        <div class="clock-count" id="clock">00:00:00</div>
-        <div class="days-text">日間</div>
-        
-        <div class="japanese-text">のビザを支給します</div>
-    </div>
+        <div id="visaScreen" class="screen active">
+            <div class="game-tag">【 GAME 】</div>
+            <div class="suit-icons">♣️ ♣️ ♣️</div>
+            <div class="jp-text">ゲームに生き残った方へ</div>
+            <div class="timer-display" id="mainClock">--:--:--</div>
+            <div class="visa-footer">日間</div>
+            <div class="jp-text">のビザを支給します</div>
+        </div>
 
-    <div id="missionAScreen" class="mission-screen">
-        <h2>משימה א' ♠️</h2>
-        <p>משימת עלה: הגע לנקודת הציון בפארק. האחרון מפסיד.</p>
-        <button class="action-btn" onclick="verifyLocation()">בדוק הגעה ליעד</button>
-        <div class="status-msg" id="gps-msg">סורק GPS...</div>
-    </div>
+        <div id="missionA" class="screen">
+            <div class="action-card">
+                <div class="suit-icons">♠️</div>
+                <h2>משימה א': Distance</h2>
+                <p>עליכם להגיע לנקודת הציון המסומנת בפארק ענבה. מי שיישאר מחוץ לרדיוס ב-16:30 - הוויזה שלו תבוטל.</p>
+                <button class="btn-main" onclick="checkGPS()">בדוק מיקום GPS</button>
+                <p id="gps-status" style="font-size: 0.8rem;"></p>
+            </div>
+        </div>
 
-    <div id="missionBScreen" class="mission-screen">
-        <h2>משימה ב' ♥️</h2>
-        <p>משימת לב: משחק האמון. מצאו את הקוד 666.</p>
-        <button class="action-btn" onclick="inputWinCode()">הזן קוד ניטרול</button>
-    </div>
+        <div id="missionB" class="screen">
+            <div class="action-card">
+                <div class="suit-icons">♣️</div>
+                <h2>משימה ב': Unity</h2>
+                <p>עבודת צוות: הזינו את מספר חברי הקבוצה כפול 10 כדי להמשיך.</p>
+                <input type="number" id="teamInput" style="width:100%; padding:15px; margin-top:10px; border:1px solid #ddd; border-radius:10px;">
+                <button class="btn-main" onclick="checkMissionB()">אשר קוד צוות</button>
+            </div>
+        </div>
 
-    <div id="winScreen" class="mission-screen">
-        <h1 style="color: #00aa00; font-size: 3rem;">GAME CLEARED</h1>
-    </div>
+        <div id="missionC" class="screen">
+            <div class="action-card">
+                <div class="suit-icons">♦️</div>
+                <h2>משימה ג': Logic</h2>
+                <p>חידת הקוד: מהו המספר הבא בסדרה? <br><b>2, 4, 8, 16, ?</b></p>
+                <input type="number" id="logicInput" style="width:100%; padding:15px; margin-top:10px; border:1px solid #ddd; border-radius:10px;">
+                <button class="btn-main" onclick="checkMissionC()">שלח פתרון</button>
+            </div>
+        </div>
 
-    <div id="testControls">
-        <button class="test-btn" onclick="testStartGame()">טסט לתחילת משחק</button>
-        <button class="test-btn" onclick="testSkipToMissionB()">דילוג למשימה ב'</button>
+        <div id="missionD" class="screen">
+            <div class="action-card" style="border: 2px solid #ff4444;">
+                <div class="suit-icons" style="color:#ff4444">♥️</div>
+                <h2 style="color:#ff4444">משימה ד': TRUST</h2>
+                <p>אזהרה: אחד מכם הוא החפרפרת. <br>מצאו את קוד הניטרול הסופי.</p>
+                <button class="btn-main" style="background:#ff4444" onclick="finalAttempt()">הזן קוד ניטרול (666)</button>
+            </div>
+        </div>
+
+        <div id="winScreen" class="screen">
+            <h1 style="font-size: 3rem; letter-spacing: -1px;">GAME<br>CLEARED</h1>
+            <div class="suit-icons">🃏</div>
+            <p>הוויזה שלך הוארכה ב-14 ימים.</p>
+        </div>
+
     </div>
 
     <script>
-        // תאריך תחילת המשחק: 2 באפריל, 2026, 16:00
-        const gameStart = new Date("April 2, 2026 16:00:00").getTime();
-        
-        // קואורדינטות פארק ענבה
-        const targetSprint = { lat: 32.10725, lon: 34.87786 };
-        const radius = 0.0006; // רדיוס כ-60 מטר
-        
-        let winAttempt = 0;
+        // תאריך יעד: 2 לאפריל 2026, 16:00
+        const targetDate = new Date("April 2, 2026 16:00:00").getTime();
+        const sprintCoords = { lat: 32.10725, lon: 34.87786 };
+        let failCount = 0;
 
-        function updateClock() {
+        // ניהול מסכים
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // טיימר מרכזי
+        const timerInterval = setInterval(() => {
             const now = new Date().getTime();
-            const dist = gameStart - now;
+            const diff = targetDate - now;
 
-            // אם הזמן הגיע
-            if (dist < 0) {
-                document.getElementById('visaScreen').classList.remove('visa-active');
-                document.getElementById('missionAScreen').classList.add('mission-active');
-                clearInterval(clockInterval);
+            if (diff <= 0) {
+                showScreen('missionA');
+                clearInterval(timerInterval);
                 return;
             }
 
-            // חישוב הזמן שנותר
-            const days = Math.floor(dist / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((dist % (1000 * 60)) / 1000);
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('mainClock').innerText = 
+                `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
 
-            // עדכון התצוגה (אם יש ימים, מראים אותם)
-            if (days > 0) {
-                document.getElementById('clock').innerText = days;
-                document.getElementById('clock').style.fontSize = "5rem";
-                document.querySelector('.days-text').style.display = "block";
-            } else {
-                document.getElementById('clock').innerText = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-                document.getElementById('clock').style.fontSize = "3rem";
-                document.querySelector('.days-text').style.display = "none";
-            }
-        }
-        let clockInterval = setInterval(updateClock, 1000);
-
-        // לוגיקת משחק א'
-        function verifyLocation() {
+        // משימה א' - GPS
+        function checkGPS() {
             if (navigator.geolocation) {
-                document.getElementById('gps-msg').innerText = "בודק מיקום...";
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-                    const dist = Math.sqrt(Math.pow(lat - targetSprint.lat, 2) + Math.pow(lon - targetSprint.lon, 2));
-                    
-                    if (dist < radius) {
-                        document.getElementById('gps-msg').innerText = "סטטוס: בתוך הזירה. בטוח.";
-                        alert("ויזה הוארכה.");
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const dist = Math.sqrt(Math.pow(pos.coords.latitude - sprintCoords.lat, 2) + Math.pow(pos.coords.longitude - sprintCoords.lon, 2));
+                    if (dist < 0.0007) {
+                        alert("הגעת ליעד! עוברים למשימה הבאה.");
+                        showScreen('missionB');
                     } else {
-                        document.getElementById('gps-msg').innerText = "סטטוס: מחוץ לזירה!";
-                        alert("אתה מחוץ לטווח. רוץ!");
+                        alert("אתה עדיין רחוק מדי מהנקודה!");
                     }
-                }, () => { alert("שגיאת GPS. נא לאשר הרשאות!"); });
+                });
             }
         }
 
-        // לוגיקת משחק ב'
-        function inputWinCode() {
-            let code = prompt("הכנס קוד לניטרול:");
-            if (code === "666") {
-                if (winAttempt === 0) {
-                    alert("שגיאת מערכת. נסה שוב.");
-                    winAttempt++;
-                } else {
-                    document.getElementById('missionBScreen').classList.remove('mission-active');
-                    document.getElementById('winScreen').classList.add('mission-active');
-                }
+        // משימה ב'
+        function checkMissionB() {
+            if(document.getElementById('teamInput').value > 0) {
+                showScreen('missionC');
             } else {
                 alert("קוד שגוי.");
             }
         }
 
-        // פונקציות טסט
-        function testStartGame() {
-            document.getElementById('visaScreen').classList.remove('visa-active');
-            document.getElementById('missionAScreen').classList.add('mission-active');
-            document.getElementById('testControls').style.display = "none";
-            clearInterval(clockInterval);
+        // משימה ג'
+        function checkMissionC() {
+            if(document.getElementById('logicInput').value == "32") {
+                showScreen('missionD');
+            } else {
+                alert("חידה לא נכונה. נסה שוב.");
+            }
         }
 
-        function testSkipToMissionB() {
-            document.getElementById('visaScreen').classList.remove('visa-active');
-            document.getElementById('missionAScreen').classList.remove('mission-active');
-            document.getElementById('missionBScreen').classList.add('mission-active');
-            document.getElementById('testControls').style.display = "none";
-            clearInterval(clockInterval);
+        // משימה ד' - החפרפרת והסוף
+        function finalAttempt() {
+            let code = prompt("הזן קוד ניטרול:");
+            if (code === "666") {
+                if (failCount === 0) {
+                    alert("שגיאת מערכת! החפרפרת חסמה את הקוד. נסו שוב.");
+                    failCount++;
+                } else {
+                    showScreen('winScreen');
+                    document.body.style.backgroundColor = "#e6fffa";
+                }
+            }
         }
     </script>
 </body>
